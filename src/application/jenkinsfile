@@ -1,0 +1,21 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Checkout code') {
+            steps {
+                git branch: 'main', url: 'https://github.com/omaymajabri-2003/mon-projet-jenkins.git'
+            }
+        }
+        stage('Compile code') {
+            steps {
+                bat 'javac -d bin src/application/Test.java'
+            }
+        }
+        stage('Execute code') {
+            steps {
+                bat 'java -cp bin application.Test'
+            }
+        }
+    }
+}
