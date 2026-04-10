@@ -1,46 +1,36 @@
 pipeline {
     agent any
     
-    tools {
-        // Vérifie que le nom "M2_HOME" est bien celui configuré dans Jenkins Tools
-        maven 'M2_HOME' 
-    }
-    
     stages {
         stage('Checkout code') {
             steps {
-                // Utilisation de TON dépôt GitHub
                 git branch: 'master', url: 'https://github.com/omaymajabri-2003/mon-projet-jenkins.git'
             }
         }
         
-        stage('Build maven') {
-            steps {
-                sh 'mvn clean install'
-            }
-        }
+        // L'étape Build Maven a été supprimée car il n'y a pas de pom.xml
         
         stage('Build Dockerfile') {
             steps {
-                // 1. Construction de l'image locale avec le numéro du build
-                sh 'docker build . -t my-country-service:$BUILD_NUMBER'
+                // 1. Construction de l'image
+                bat 'docker build . -t my-country-service:%BUILD_NUMBER%'
                 
-                // 2. Connexion à Docker Hub (Vérifie que ton ID Credentials est 'dockerhub-paswd')
+                // 2. Connexion à Docker Hub
                 withCredentials([string(credentialsId: 'dockerhub-paswd', variable: 'dockerhubpwd')]) {
-                    sh "docker login -u omaymaajabri -p ${dockerhubpwd}"
+                    bat "docker login -u omaymaajabri -p %dockerhubpwd%"
                 }
                 
-                // 3. Tag et Push vers TON Docker Hub
-                sh 'docker tag my-country-service:$BUILD_NUMBER omaymaajabri/my-country-service:$BUILD_NUMBER'
-                sh 'docker push omaymaajabri/my-country-service:$BUILD_NUMBER'
+                // 3. Tag et Push
+                bat 'docker tag my-country-service:%BUILD_NUMBER% omaymaajabri/my-country-service:%BUILD_NUMBER%'
+                bat 'docker push omaymaajabri/my-country-service:%BUILD_NUMBER%'
             }
         }
         
         stage('Deploy microservice') {
             steps {
-                sh '''
-                docker rm -f country-service || true
-                docker run -d -p 8082:8082 --name country-service omaymaajabri/my-country-service:$BUILD_NUMBER
+                bat '''
+                docker rm -f country-service || exit 0
+                docker run -d --name country-service omaymaajabri/my-country-service:%BUILD_NUMBER%
                 '''
             }
         }
