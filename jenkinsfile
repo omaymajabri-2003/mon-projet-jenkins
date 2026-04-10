@@ -1,22 +1,47 @@
 pipeline {
     agent any
-
+    
+    tools {
+        // Vérifie que le nom "M2_HOME" est bien celui configuré dans Jenkins Tools
+        maven 'M2_HOME' 
+    }
+    
     stages {
         stage('Checkout code') {
             steps {
-                // Jenkins télécharge votre code depuis votre GitHub
-                git branch: 'main', url: 'https://github.com/omaymajabri-2003/mon-projet-jenkins.git'
+                // Utilisation de TON dépôt GitHub
+                git branch: 'master', url: 'https://github.com/omaymajabri-2003/mon-projet-jenkins.git'
             }
         }
-        stage('Compile code') {
+        
+        stage('Build maven') {
             steps {
-                // On utilise 'bat' au lieu de 'sh' car vous êtes sur Windows
-                bat 'javac -d bin src/application/Test.java'
+                sh 'mvn clean install'
             }
         }
-        stage('Execute code') {
+        
+        stage('Build Dockerfile') {
             steps {
-                bat 'java -cp bin application.Test'
+                // 1. Construction de l'image locale avec le numéro du build
+                sh 'docker build . -t my-country-service:$BUILD_NUMBER'
+                
+                // 2. Connexion à Docker Hub (Vérifie que ton ID Credentials est 'dockerhub-paswd')
+                withCredentials([string(credentialsId: 'dockerhub-paswd', variable: 'dockerhubpwd')]) {
+                    sh "docker login -u omaymaajabri -p ${dockerhubpwd}"
+                }
+                
+                // 3. Tag et Push vers TON Docker Hub
+                sh 'docker tag my-country-service:$BUILD_NUMBER omaymaajabri/my-country-service:$BUILD_NUMBER'
+                sh 'docker push omaymaajabri/my-country-service:$BUILD_NUMBER'
+            }
+        }
+        
+        stage('Deploy microservice') {
+            steps {
+                sh '''
+                docker rm -f country-service || true
+                docker run -d -p 8082:8082 --name country-service omaymaajabri/my-country-service:$BUILD_NUMBER
+                '''
             }
         }
     }
