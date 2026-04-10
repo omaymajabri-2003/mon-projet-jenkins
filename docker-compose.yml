@@ -1,0 +1,11 @@
+services:
+  my-compte-service1:
+    build: .
+    container_name: my-compte-service1
+    ports:
+      - '8082:8080'  # Port 8082 sur votre PC
+  my-compte-service2:
+    build: .
+    container_name: my-compte-service2
+    ports:
+      - '8083:8080'  # Port 8083 sur votre PC
