@@ -14,6 +14,7 @@ spec:
     spec:
       containers:
         - name: myapp-container
-          image: nginx:latest  # ON UTILISE NGINX POUR LE TEST
+          # On utilise l'image du cours qui contient le Swagger
+          image: jmouna/my-country-service:22 
           ports:
-            - containerPort: 80 # Nginx écoute sur le port 80
+            - containerPort: 8082
