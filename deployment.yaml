@@ -3,19 +3,20 @@ kind: Deployment
 metadata:
   name: myapp-deployment
   labels:
-    app: myapp
+    app: country-service
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: myapp
+      app: country-service
   template:
     metadata:
       labels:
-        app: myapp
+        app: country-service
     spec:
       containers:
         - name: myapp-container
-          image: nginx:latest
+          # Utilisez l'image que vous avez envoyée sur Docker Hub
+          image: omaymaajabri/my-country-service:12
           ports:
-            - containerPort: 80
+            - containerPort: 8082
