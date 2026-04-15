@@ -2,10 +2,8 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: myapp-deployment
-  labels:
-    app: country-service
 spec:
-  replicas: 3
+  replicas: 1
   selector:
     matchLabels:
       app: country-service
@@ -16,7 +14,6 @@ spec:
     spec:
       containers:
         - name: myapp-container
-          # Utilisez l'image que vous avez envoyée sur Docker Hub
-          image: omaymaajabri/my-country-service:12
+          image: nginx:latest  # ON UTILISE NGINX POUR LE TEST
           ports:
-            - containerPort: 8082
+            - containerPort: 80 # Nginx écoute sur le port 80
